@@ -443,6 +443,60 @@ section{padding:84px 0;scroll-margin-top:80px;position:relative}
 }
 .video-card figcaption{padding:15px 18px;font-family:var(--serif);font-style:italic;font-size:1.02rem;color:var(--ink-soft)}
 
+/* ---------- A Little Game (swipe deck) ---------- */
+.game{background:linear-gradient(180deg,var(--cream-2) 0%,var(--cream) 100%)}
+.deck{position:relative;width:min(340px,84vw);margin:0 auto}
+.deck-stack{position:relative;height:min(500px,72vh);touch-action:pan-y;user-select:none;-webkit-user-select:none}
+.deck-card{
+  position:absolute;inset:0;margin:0;
+  background:var(--paper);border:1px solid var(--line);border-radius:26px;
+  overflow:hidden;display:flex;flex-direction:column;
+  box-shadow:var(--shadow);
+  transition:transform .4s var(--ease),opacity .4s var(--ease),box-shadow .4s var(--ease);
+  will-change:transform;
+}
+.deck-card.behind{pointer-events:none;box-shadow:var(--shadow-sm)}
+.deck-card.top{cursor:grab;box-shadow:var(--shadow-lg)}
+.deck-card.top:active{cursor:grabbing}
+.deck-card img{flex:1;min-height:0;width:100%;object-fit:cover;-webkit-user-drag:none}
+.deck-card figcaption{padding:16px 20px 18px;display:flex;flex-direction:column;gap:5px}
+.deck-num{font-family:var(--sans);font-size:.62rem;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
+.deck-num i{font-style:normal;color:var(--ink-faint)}
+.deck-reason{font-family:var(--serif);font-style:italic;font-size:1.22rem;line-height:1.35;color:var(--ink)}
+.deck-hint{text-align:center;margin-top:16px;font-family:var(--serif);font-style:italic;color:var(--ink-faint);font-size:.98rem;transition:opacity .4s}
+.deck-hint.hidden{opacity:0}
+.deck-count{text-align:center;margin-top:14px;font-family:var(--sans);font-size:.68rem;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint)}
+.deck-controls{display:flex;justify-content:center;gap:14px;margin-top:20px}
+.deck-btn{
+  min-width:120px;padding:12px 22px;border-radius:999px;
+  border:1px solid var(--line);background:var(--paper);color:var(--ink);
+  font-family:var(--sans);font-size:.76rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  box-shadow:var(--shadow-sm);transition:transform .25s var(--ease),border-color .3s,color .3s,background .3s;
+}
+.deck-btn:hover{transform:translateY(-2px);border-color:var(--rose);color:var(--rose-deep)}
+.deck-btn:active{transform:scale(.96)}
+.deck-done{
+  position:absolute;inset:0;z-index:30;text-align:center;
+  background:linear-gradient(160deg,var(--paper),var(--cream));
+  border:1px solid var(--line);border-radius:26px;box-shadow:var(--shadow);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  padding:30px;font-family:var(--serif);font-style:italic;font-size:1.3rem;line-height:1.5;color:var(--ink);
+}
+.deck-done[hidden]{display:none}
+.done-heart{font-size:2.6rem;color:var(--rose-deep);animation:pulse 1.8s ease-in-out infinite}
+.deck-replay{
+  font-family:var(--sans);font-style:normal;font-size:.72rem;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+  color:#fff;background:var(--rose-deep);border-radius:999px;padding:12px 26px;
+  box-shadow:0 8px 20px -8px rgba(185,106,79,.7);
+  transition:transform .25s var(--ease),background .3s;
+}
+.deck-replay:hover{transform:translateY(-2px);background:#a85a40}
+.game-heart{
+  position:fixed;z-index:130;pointer-events:none;color:var(--rose);
+  animation:gameHeart .9s cubic-bezier(.16,.84,.44,1) forwards;
+}
+@keyframes gameHeart{to{transform:translate(var(--tx),var(--ty)) rotate(var(--rot)) scale(1.35);opacity:0}}
+
 /* ---------- Closing letter ---------- */
 .letter{background:linear-gradient(180deg,var(--cream-2) 0%,var(--cream) 60%)}
 .letter-paper{
@@ -518,6 +572,7 @@ footer .heart{color:var(--rose-deep)}
         <li><a href="#memories"><span class="num">02</span>Memories</a></li>
         <li><a href="#moments"><span class="num">03</span>Moments</a></li>
         <li><a href="#letter"><span class="num">04</span>A Letter</a></li>
+        <li><a href="#game"><span class="num">05</span>Play</a></li>
       </ul>
     </nav>
   </div>
@@ -772,6 +827,40 @@ footer .heart{color:var(--rose-deep)}
 </section>
 
 <!-- ============================================================
+     🎮 A LITTLE GAME — swipe through the reasons
+     ------------------------------------------------------------------
+     • Drag a card away (or use Next / the arrow keys) to reveal each reason.
+     • To change the cards, edit the REASONS array in the <script>.
+============================================================ -->
+<section class="game" id="game">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="divider" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 21s-7.5-4.7-10-9.2C.3 8.4 2.3 4.5 6 4.5c2.3 0 4 1.2 6 3.5 2-2.3 3.7-3.5 6-3.5 3.7 0 5.7 3.9 4 7.3-2.5 4.5-10 9.2-10 9.2z"/></svg>
+      </div>
+      <h2>A Little Game</h2>
+      <p class="lead">Swipe each card away and discover why I'm so glad we met — drag a card, tap Next, or use the arrow keys.</p>
+    </div>
+
+    <div class="deck reveal">
+      <div class="deck-stack" id="deckStack" tabindex="0" role="region" aria-label="Reasons cards">
+        <div class="deck-done" id="deckDone" hidden>
+          <span class="done-heart">♥</span>
+          <p>That's all of them — every reason,<br>and you're still my favourite one.</p>
+          <button class="deck-replay" id="deckReplay" type="button">Play again ↺</button>
+        </div>
+      </div>
+      <p class="deck-hint" id="deckHint">drag a card away ↷</p>
+    </div>
+    <p class="deck-count" id="deckCount" aria-live="polite">1 of 8</p>
+    <div class="deck-controls">
+      <button class="deck-btn" id="deckPrev" type="button" aria-label="Previous card">‹ Previous</button>
+      <button class="deck-btn" id="deckNext" type="button">Next ›</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
      💌 HEARTFELT CLOSING LETTER
 ============================================================ -->
 <section class="letter" id="letter">
@@ -824,6 +913,7 @@ footer .heart{color:var(--rose-deep)}
       <li><a href="#memories">Memories</a></li>
       <li><a href="#moments">Moments</a></li>
       <li><a href="#letter">A Letter</a></li>
+      <li><a href="#game">Play</a></li>
     </ul>
     <p>Made with love, just for you <span class="heart">♡</span></p>
     <p>© <span id="year">2026</span> · Always in my prayers</p>
@@ -1082,6 +1172,152 @@ footer .heart{color:var(--rose-deep)}
 
   /* ---- 7. Footer year ---- */
   document.getElementById('year').textContent = new Date().getFullYear();
+
+  /* ---- 8. A Little Game — swipe through the reasons ---- */
+  var deckStack = document.getElementById('deckStack');
+  var deckCount = document.getElementById('deckCount');
+  var deckHint = document.getElementById('deckHint');
+  var deckDone = document.getElementById('deckDone');
+  var deckPrev = document.getElementById('deckPrev');
+  var deckNext = document.getElementById('deckNext');
+  var deckReplay = document.getElementById('deckReplay');
+
+  // Edit these cards any time — each needs a photo and a short reason.
+  var REASONS = [
+    { img: 'IMG_3390.jpg', alt: 'Us on one of our favorite days', text: 'Your laugh fixes my worst days.' },
+    { img: 'IMG_0605.JPG', alt: 'Us smiling together', text: 'You make ordinary moments feel golden.' },
+    { img: 'IMG_3471.jpg', alt: 'Us side by side', text: 'You listen — really, properly listen.' },
+    { img: 'IMG_3872.jpg', alt: 'Us at golden hour', text: 'You never let me feel alone.' },
+    { img: 'IMG_0619.JPG', alt: 'One of our favorite frames', text: 'You are my favourite hello and my hardest goodbye.' },
+    { img: 'IMG_3873.jpg', alt: 'The day it all began', text: 'You believe in me even when I doubt myself.' },
+    { img: 'IMG_3458.jpg', alt: 'Another memory of ours', text: 'You turned a random meeting into my best chapter.' },
+    { img: 'IMG_3450.jpg', alt: 'One more memory', text: 'You are simply, completely you.' }
+  ];
+  var totalCards = REASONS.length;
+  var cardPos = 0;          // how many cards have been swiped away
+  var cardAnimating = false;
+  var cardDragging = false;
+  var cardStart = null;
+
+  function buildDeck() {
+    Array.prototype.forEach.call(deckStack.querySelectorAll('.deck-card'), function (c) { c.remove(); });
+    deckCount.textContent = (cardPos < totalCards ? cardPos + 1 : totalCards) + ' of ' + totalCards;
+    if (cardPos >= totalCards) {
+      deckDone.hidden = false;
+      deckHint.classList.add('hidden');
+      return;
+    }
+    deckDone.hidden = true;
+    var remaining = totalCards - cardPos;
+    for (var k = 0; k < remaining; k++) {
+      var d = REASONS[cardPos + k];
+      var card = document.createElement('figure');
+      card.className = 'deck-card' + (k === 0 ? ' top' : ' behind');
+      card.style.zIndex = String(totalCards - k);
+      if (k > 0) {
+        var rot = (k % 2 === 0 ? 3 : -3);
+        card.style.transform = 'translateY(' + (k * 7) + 'px) rotate(' + rot + 'deg) scale(' + (1 - k * 0.03) + ')';
+      }
+      card.innerHTML =
+        '<img src="' + d.img + '" alt="' + d.alt + '" loading="lazy" draggable="false">' +
+        '<figcaption>' +
+          '<span class="deck-num">' + (cardPos + k + 1) + ' <i>of</i> ' + totalCards + '</span>' +
+          '<span class="deck-reason">' + d.text + '</span>' +
+        '</figcaption>';
+      deckStack.appendChild(card);
+    }
+    wireTopCard();
+  }
+
+  function wireTopCard() {
+    var card = deckStack.querySelector('.deck-card.top');
+    if (!card) return;
+    card.addEventListener('pointerdown', function (e) {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      if (cardAnimating) return;
+      cardDragging = true;
+      cardStart = { x: e.clientX, y: e.clientY };
+      card.setPointerCapture(e.pointerId);
+      card.style.transition = 'none';
+    });
+    card.addEventListener('pointermove', function (e) {
+      if (!cardDragging) return;
+      var dx = e.clientX - cardStart.x;
+      var dy = e.clientY - cardStart.y;
+      card.style.transform = 'translate(' + dx + 'px,' + dy + 'px) rotate(' + (dx * 0.08) + 'deg)';
+    });
+    card.addEventListener('pointerup', function (e) {
+      if (!cardDragging) return;
+      cardDragging = false;
+      var dx = e.clientX - cardStart.x;
+      var dy = e.clientY - cardStart.y;
+      card.style.transition = '';
+      if (Math.abs(dx) > 90) tossCard(dx > 0 ? 1 : -1, dx, dy);
+      else card.style.transform = '';
+    });
+    card.addEventListener('pointercancel', function () {
+      cardDragging = false;
+      card.style.transition = '';
+      card.style.transform = '';
+    });
+  }
+
+  function tossCard(dir, dx, dy) {
+    if (cardAnimating) return;
+    var card = deckStack.querySelector('.deck-card.top');
+    if (!card) return;
+    cardAnimating = true;
+    card.style.pointerEvents = 'none';
+    card.style.transform = 'translate(' + (dir * 340 + (dx || 0)) + 'px,' + ((dy || 0) - 50) + 'px) rotate(' + (dir * 26) + 'deg)';
+    card.style.opacity = '0';
+    deckHint.classList.add('hidden');
+    burstHearts();
+    var reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setTimeout(function () {
+      cardPos++;
+      cardAnimating = false;
+      buildDeck();
+    }, reduced ? 0 : 400);
+  }
+
+  function burstHearts() {
+    var rect = deckStack.getBoundingClientRect();
+    var hearts = ['♥', '♡', '✦', '✿'];
+    for (var i = 0; i < 10; i++) {
+      var h = document.createElement('span');
+      h.className = 'game-heart';
+      h.textContent = hearts[i % hearts.length];
+      h.style.left = (rect.left + rect.width / 2 + (Math.random() * 180 - 90)) + 'px';
+      h.style.top = (rect.top + rect.height / 2 + (Math.random() * 80 - 40)) + 'px';
+      h.style.fontSize = (14 + Math.random() * 18) + 'px';
+      h.style.setProperty('--tx', (Math.random() * 260 - 130) + 'px');
+      h.style.setProperty('--ty', (-(70 + Math.random() * 130)) + 'px');
+      h.style.setProperty('--rot', (Math.random() * 80 - 40) + 'deg');
+      document.body.appendChild(h);
+      (function (el) { setTimeout(function () { el.remove(); }, 950); })(h);
+    }
+  }
+
+  deckNext.addEventListener('click', function () { tossCard(-1, -20, 0); });
+  deckPrev.addEventListener('click', function () {
+    if (cardAnimating) return;
+    if (cardPos > 0) { cardPos--; buildDeck(); }
+  });
+  deckReplay.addEventListener('click', function () {
+    cardPos = 0;
+    cardAnimating = false;
+    buildDeck();
+    deckHint.classList.remove('hidden');
+  });
+  deckStack.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      if (cardPos < totalCards) { e.preventDefault(); deckNext.click(); }
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      if (cardPos > 0) { e.preventDefault(); deckPrev.click(); }
+    }
+  });
+
+  buildDeck();
 })();
 </script>
 </body>
